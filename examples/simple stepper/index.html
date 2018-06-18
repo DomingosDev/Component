@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Component example</title>
+</head>
+<body>
+	<div data-component="example">
+		<button class="example_minus" data-bind="click">-</button>
+		<input type="text" class="example_input" data-bind="change" value='0'>
+		<button class="example_plus" data-bind="click">+</button>
+		<div>
+			The value of input is <span class="example_result">0</span>
+		</div>
+	</div>
+	<script src="require.js"></script>
+	<script src="Component.js"></script>
+</body>
+</html>
