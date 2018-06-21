@@ -133,6 +133,7 @@
             Object
                 .keys( component.elements )
                 .forEach(function(element){
+                    console.log( self.querySelectorAll( '.' + component.name + '_' + element ) );
                     [].slice.call(self.querySelectorAll( '.' + component.name + '_' + element ))
                     .forEach(function(_element){
                         var binds = [];

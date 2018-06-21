@@ -1,0 +1,10 @@
+{{#.}}
+	<li {{#completed}}class="completed"{{/completed}} data-id="{{id}}" data-component="todo-item" class="todo_item" >
+		<div class="view">
+			<input class="toggle todo-item_check" type="checkbox" {{#completed}}checked{{/completed}}>
+			<label>{{title}}</label>
+			<button class="destroy todo-item_remove"></button>
+		</div>
+		<input class="edit todo-item_edit" value="{{title}}">
+	</li>
+{{/.}}
