@@ -1,5 +1,5 @@
 (function() {
-    var handledEvents = ['blur', 'change', 'focus', 'focusin', 'focusout', 'select', 'submit', 'click', 'contextmenu', 'dblclick', 'hover', 'mousedown', 'mouseenter', 'mouseleave', 'mousemove', 'mouseout', 'mouseover', 'mouseup', 'keydown', 'keypress', 'keyup', 'resize', 'scroll'];
+    var handledEvents = ['blur', 'change', 'focus', 'focusin', 'focusout', 'select', 'submit', 'click', 'contextmenu', 'dblclick', 'hover', /*'mousedown', 'mouseenter', 'mouseleave', 'mousemove', 'mouseout', 'mouseover', 'mouseup',*/ 'keydown', 'keypress', 'keyup', 'resize', 'scroll'];
     handledEvents.forEach(function(event) { document.addEventListener(event, componentEvent); });
 
     new MutationObserver(componentObserver).observe(document.body, {
@@ -29,8 +29,28 @@
     };
 
     function componentEvent(event) {
-        if (!event.target || !event.target.attributes || !event.target.attributes['data-bind']) return;
 
+
+
+       
+         var component = event.target;
+        var path = [event.target];
+        var components = {};
+
+        while (component != document.body) {
+            component = component.parentElement;
+            path.push(component);
+        }
+
+        var components = path.reduce(function(carry, element){
+            if( !element.attributes['data-component'] || carry.indexOf(element.attributes['data-component'].value) != -1 ) return carry;
+            carry.push( element.attributes['data-component'].value );
+            return carry;
+        }, []);
+
+        console.log( path, components );
+        if (!event.target || !event.target.attributes || !event.target.attributes['data-bind']) return;
+        
         var component = event.target;
         var components = [];
         var named_components = {};
@@ -133,7 +153,6 @@
             Object
                 .keys( component.elements )
                 .forEach(function(element){
-                    console.log( self.querySelectorAll( '.' + component.name + '_' + element ) );
                     [].slice.call(self.querySelectorAll( '.' + component.name + '_' + element ))
                     .forEach(function(_element){
                         var binds = [];
@@ -149,4 +168,5 @@
         return Component;
     });
 
+    document.body.innerHTML += "<div></div>";
 })();

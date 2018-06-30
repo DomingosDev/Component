@@ -22,49 +22,82 @@
             var self = component;
             if(component.installed) return;
             require([self.attributes['data-component'].value], function(module) {
-                module.install.call(self, module);
+                module.install.call(self);
                 self.installed = true;
             });
         });
     };
 
-    function componentEvent(event) {
-        if (!event.target || !event.target.attributes || !event.target.attributes['data-bind']) return;
 
-        var component = event.target;
-        var components = [];
-        var named_components = {};
-        var target = event.target;
-        var action = {};
+    function insereElemento(c,element){
 
-        while (component != document.body) {
-            if (component.attributes['data-component']) {
-                components.push(component.attributes['data-component'].value);
-                named_components[component.attributes['data-component'].value] = component;
-            }
-            component = component.parentElement;
+         var component = ( element.attributes['data-component'] )? element.attributes['data-component'].value : '' ;
+        
+        if( component ){
+            element.component = component;
+            c.last_component[ component ] = {
+                element : element,
+                name : component,
+                elements : []
+            };
+            c.components.push( c.last_component[component] );
         }
 
-        if (!components.length) return;
-        target.className.split(' ')
-            .forEach(function(el) {
-                if (el.indexOf('_') == -1) return false;
-                var parts = el.split('_');
-                if (components.indexOf(parts[0]) == -1) return false;
-                if (parts[1].indexOf('--') != -1) return false; // cortando modifiers
-                if (!action[parts[0]]) action[parts[0]] = [];
-                action[parts[0]].push(el);
-            });
+        var classList = element.className.split(' ');
+        var l = classList.length;
+        for(var i=0; i<l; i++){
+            var _class = classList[i];
+            var _i = _class.indexOf('_');
+            if( _i  == -1 ) continue;
+            if( _class.indexOf('--') != -1 ) continue;
+            if( _i != _class.lastIndexOf('_') ) continue;
 
-        Object.keys(action).forEach(function(m) {
-            require([m], function(module) {
-                if (!module.events || !module.events[event.type]) return;
-                action[m].forEach(function(method) {
-                    if (!module.events[event.type][method]) return;
-                    module.events[event.type][method].call(target, named_components[m], event);
-                });
+            var parts = _class.split('_');
+            if(!c.last_component[ parts[0] ]) continue;
+            c.last_component[ parts[0] ].elements.push( {
+                name : _class,
+                element : element
+            });
+        }
+
+        return c;
+    }
+
+    function componentEvent(event) {
+        if( !event.target || !event.target.tagName || ['HTML', 'BODY'].indexOf( event.target.tagName ) != -1  ) return;
+
+        var element = event.target;
+        var element_list = [];
+
+        while( element != document.body ){
+            element_list.push( element );
+            element = element.parentElement;
+        }
+
+        var data = element_list.reverse().reduce( insereElemento, { 
+            waiting_components : {},
+            components : [],
+            last_component : {}
+        });
+
+        var called = [];
+        data.components.reverse().forEach(function(component){
+            require( [component.name], function(module) { 
+                if( !module.events[event.type] ) return;
+
+                component.elements
+                            .reverse()
+                            .forEach(function(element){
+                                if( !module.events[ event.type ][ element.name ] ) return;
+                                if( called.indexOf( module.events[ event.type ][ element.name ] ) != -1 ) return;
+                                module.events[ event.type ][ element.name ].call( element.element, component.element, event );
+                                called.push( module.events[ event.type ][ element.name ] );
+                            });
+
             });
         });
+
+       return;
     }
 
     define('Component', [], function() {
@@ -75,10 +108,15 @@
 
         Component._events = {};
         Component.instances = [];
-        Component.on   = function() {   on.apply(Component, arguments); }
-        Component.off  = function() {  off.apply(Component, arguments); }
-        Component.emit = function() { emit.apply(Component, arguments); }
-        Component.install = install;
+        Component.on = function() {
+            on.apply(Component, arguments);
+        }
+        Component.off = function() {
+            off.apply(Component, arguments);
+        }
+        Component.emit = function() {
+            emit.apply(Component, arguments);
+        }
         Component.prototype = {
             on: on,
             off: off,
@@ -88,7 +126,7 @@
             elements: {},
             register: register,
             bootstrap: bootstrap,
-            install: install
+            install: function() {}
         };
 
         function on(event, cb) {
@@ -126,22 +164,6 @@
             if (!this.events[event]) this.events[event] = {};
             if (!this.events[event][target]) this.events[event][target] = {};
             this.events[event][target] = fn;
-        }
-
-        function install( component ){
-            var self = this;
-            Object
-                .keys( component.elements )
-                .forEach(function(element){
-                    [].slice.call(self.querySelectorAll( '.' + component.name + '_' + element ))
-                    .forEach(function(_element){
-                        var binds = [];
-                        if( _element.attributes['data-bind'] ) binds = binds.concat( _element.attributes['data-bind'].value.split(',') );
-                        binds = binds.concat( Object.keys(component.elements[element]) );
-                        _element.setAttribute('data-bind', binds.join(',') );
-                    })
-
-                });
         }
 
         window.Component = Component;

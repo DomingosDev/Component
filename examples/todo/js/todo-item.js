@@ -12,12 +12,10 @@ define('todo-item',['Component'], function(Component, todoTemplate, footerTempla
 	function itemChange(component, event){ 
 		var $component = $(component);
 		$component.toggleClass('completed', this.checked);
-		Component.emit( 'item::change', {id:$component.data('id'), completed:this.checked} );
 	};
 
 	function removeItem(component, event){
 		var $component = $(component);
 		$component.remove();
-		Component.emit( 'item::remove', {id:$component.data('id')} );
 	}
 });
