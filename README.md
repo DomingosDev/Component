@@ -12,11 +12,7 @@ Você precisará incluir no seu HTML  o RequireJS e apontar o atributo **data-ma
 
 
 ```html
-<script 
- 	src="node_modules/requirejs/require.js" 
- 	data-main="js/Component"
->
-</script>
+<script src="node_modules/requirejs/require.js" data-main="js/Component" ></script>
 ```
 
 Desse modo a descoberta de componentes adicionados ao documento é feita de forma automática.
@@ -27,10 +23,10 @@ Vamos criar um componente Hello World para ilustrar a funcionalidade de componen
 **index.html**
 
 ```html
-	<div class="hello" data-component="hello">
-		<span class="hello_greeting"></span>
-	</div>
-	<script src="node_modules/requirejs/require.js" data-main="js/Component"></script>
+<div class="hello" data-component="hello">
+	<span class="hello_greeting"></span>
+</div>
+<script src="node_modules/requirejs/require.js" data-main="js/Component"></script>
 ```
 
 **js/hello.js**
@@ -71,17 +67,17 @@ Para isso devemos apenas adicionar a linha referente ao botão no componente htm
 **Em js/hello.js**
 
 ```js
-	base.elements = {
-		new: { click: addNewHelloToBody }
-	};
+base.elements = {
+	new: { click: addNewHelloToBody }
+};
 	
-	 
-	function addNewHelloToBody(){
-		var newHello = document.createElement('DIV');
-		newHello.setAttribute('data-component', "hello");
-		newHello.innerHTML = '<span class="hello_greeting"></span><button class="hello_new"> Add new Hello Component </button>';
-		document.body.appendElement( newHello );
-	}
+ 
+function addNewHelloToBody(){
+	var newHello = document.createElement('DIV');
+	newHello.setAttribute('data-component', "hello");
+	newHello.innerHTML = '<span class="hello_greeting"></span><button class="hello_new"> Add new Hello Component </button>';
+	document.body.appendElement( newHello );
+}
 ```
 
 Definimos o elemento **add** adicionando uma chave ao objeto elements, e no element new definimos que seu evento **click** seja delegado a função **addNewHelloToBody**
