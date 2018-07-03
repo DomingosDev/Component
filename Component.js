@@ -166,6 +166,10 @@
             this.events[event][target] = fn;
         }
 
+        var el = document.createElement('DIV');
+        document.body.appendChild(el);
+        document.body.removeChild(el);
+
         window.Component = Component;
         return Component;
     });
